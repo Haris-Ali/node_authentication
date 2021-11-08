@@ -8,6 +8,14 @@ app.get('/', (req, res) => {
     res.send("Authentication with node and express using bcrypt")
 })
 
+app.post('/login', (req, res) => {
+
+})
+
+app.post('/signup', (req, res) => {
+
+})
+
 app.listen(PORT, () => {
     console.log(`Server is running on port: ${PORT}`)
 })
