@@ -5,25 +5,43 @@ const bcrypt = require('bcrypt')
 const app = express()
 app.use(express.json())
 
+const users = []
+
 app.get('/', (req, res) => {
     res.send("Authentication with node and express using bcrypt")
 })
 
-app.post('/login', (req, res) => {
+app.get('/users', (req, res) => {
+    res.json(users)
+})
 
+app.post('/login', async (req, res) => {
+    const user = users.find(user => user.name === req.body.name)
+    if (user == null) return res.status(400).send("Unable to find user. Please check credentials.")
+    try {
+        const doesUserExist = await bcrypt.compare(req.body.password, user.password)
+        if (doesUserExist) {
+            res.send("Successfully logged in!")
+        } else {
+            res.send("Wrong password. Please enter correct password.")
+        }
+    } catch {
+        res.status(500).send("Login failed.")
+    }
 })
 
 app.post('/signup', async (req, res) => {
     try {
-        const username = req.body.username
+        const name = req.body.name
         const password = req.body.password
         const salt = await bcrypt.genSalt()
         const hashedPassword = await bcrypt.hash(password, salt)
-        console.log(username, password, salt, hashedPassword)
-        res.statusCode(200)
+        const newUser = { name: name, password: hashedPassword }
+        users.push(newUser)
+        res.status(200).send("New user created")
     } catch {
         console.error("Error")
-        res.statusCode(500)
+        res.status(500).send("Signup failed. Please try again.")
     }
 })
 
